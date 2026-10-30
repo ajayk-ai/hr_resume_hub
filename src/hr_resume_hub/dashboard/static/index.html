@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Dashboard</title>
+  <link rel="icon" type="image/png" href="/static/bull-logo.png">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <section id="login-view" class="login" hidden>
+    <form id="login-form" class="card login-card">
+      <img class="login-logo" src="/static/bull-logo.png" alt="Bull">
+      <h1>Candidate Dashboard</h1>
+      <p class="muted">Sign in with your HR or HOD account.</p>
+      <label class="field">Username
+        <input name="username" autocomplete="username" autocapitalize="none" required>
+      </label>
+      <label class="field">Password
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <p id="login-error" class="error" role="alert"></p>
+      <button class="btn primary" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <div id="app-view" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-logo" src="/static/bull-logo.png" alt="Bull">
+        <h1 id="app-title">Candidate Dashboard</h1>
+      </div>
+      <div class="who">
+        <span id="who-name"></span>
+        <span id="who-role" class="badge"></span>
+        <button id="logout" class="btn" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <main id="admin-main" class="shell" hidden>
+      <div class="admin-layout">
+        <form id="user-form" class="card admin-form" autocomplete="off">
+          <h2>Add user</h2>
+          <label class="field">Username
+            <input name="username" autocapitalize="none" spellcheck="false" maxlength="40" required>
+          </label>
+          <label class="field">Display name
+            <input name="display_name" maxlength="80" required>
+          </label>
+          <label class="field">Role
+            <select name="role" required>
+              <option value="hr">HR (stars as HR)</option>
+              <option value="hod">HOD (stars as HOD)</option>
+              <option value="admin">Admin (manages users only)</option>
+            </select>
+          </label>
+          <label class="field">Password
+            <div class="pw-row">
+              <input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="200" required>
+              <button id="gen-password" class="btn" type="button">Generate</button>
+            </div>
+          </label>
+          <p class="muted hint">Username: lowercase letters, digits, dot, dash or underscore. Password: at least 10 characters.
+            Copy the password before you create the user. It is not shown again.</p>
+          <p id="user-form-error" class="error" role="alert"></p>
+          <button class="btn primary" type="submit">Create user</button>
+        </form>
+
+        <section class="card" aria-label="Users">
+          <div class="toolbar">
+            <h2>Users</h2>
+            <p id="user-count" class="muted" aria-live="polite"></p>
+          </div>
+          <div class="table-wrap">
+            <table id="users-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="plain">Username</th>
+                  <th scope="col" class="plain">Name</th>
+                  <th scope="col" class="plain">Role</th>
+                  <th scope="col" class="plain">Status</th>
+                  <th scope="col" class="plain">Created</th>
+                  <th scope="col" class="plain">Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <main id="review-main" class="shell">
+      <section id="kpis" class="kpis" aria-label="Summary of current results"></section>
+
+      <div class="layout">
+        <aside class="filters card" aria-label="Filters">
+          <div class="filters-head">
+            <h2>Filters <span id="active-count" class="badge" hidden></span></h2>
+            <button id="reset" class="btn link" type="button">Reset all</button>
+          </div>
+
+          <label class="field">Search
+            <input id="f-q" type="search" placeholder="Name, email, skill, company" autocomplete="off">
+          </label>
+
+          <div class="field">
+            <label for="ms-position-input">Applied position</label>
+            <div id="ms-position"></div>
+          </div>
+
+          <div class="field">
+            <label for="ms-department-input">Department</label>
+            <div id="ms-department"></div>
+          </div>
+
+          <fieldset class="field pair">
+            <legend>Experience (years)</legend>
+            <input id="f-exp-min" type="number" min="0" step="0.5" placeholder="Min" aria-label="Minimum experience in years">
+            <input id="f-exp-max" type="number" min="0" step="0.5" placeholder="Max" aria-label="Maximum experience in years">
+          </fieldset>
+
+          <label class="field">AI match score at least
+            <input id="f-score" type="number" min="0" max="100" step="5" placeholder="0 to 100">
+          </label>
+
+          <fieldset class="field pair">
+            <legend>Received between</legend>
+            <input id="f-from" type="date" aria-label="Received from">
+            <input id="f-to" type="date" aria-label="Received to">
+          </fieldset>
+
+          <div class="field">
+            <span class="field-label" id="hr-star-label">HR star</span>
+            <div id="f-hr" class="seg" role="radiogroup" aria-labelledby="hr-star-label"></div>
+          </div>
+          <div class="field">
+            <span class="field-label" id="hod-star-label">HOD star</span>
+            <div id="f-hod" class="seg" role="radiogroup" aria-labelledby="hod-star-label"></div>
+          </div>
+        </aside>
+
+        <section class="results card" aria-label="Candidates">
+          <div class="toolbar">
+            <p id="count" class="muted" aria-live="polite"></p>
+            <label class="inline">Rows per page
+              <select id="page-size">
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </label>
+          </div>
+          <div class="table-wrap">
+            <table id="table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p id="empty" class="empty" hidden>No candidates match these filters.</p>
+          <nav class="pager" aria-label="Pagination">
+            <button id="prev" class="btn" type="button">Previous</button>
+            <span id="page-info" class="muted"></span>
+            <button id="next" class="btn" type="button">Next</button>
+          </nav>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="detail" aria-labelledby="detail-title"></dialog>
+  <dialog id="user-dialog" aria-labelledby="user-dialog-title"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

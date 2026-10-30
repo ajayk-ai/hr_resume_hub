@@ -1,0 +1,45 @@
+[project]
+name = "hr-resume-hub"
+version = "0.1.0"
+description = "Load the consolidated HR resume Google Sheet into PostgreSQL"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "google-auth>=2.62.0",
+    "gspread>=6.2.1",
+    "itsdangerous>=2.2.0",
+    "psycopg-pool>=3.3.3",
+    "psycopg[binary]>=3.3.6",
+    "python-dotenv>=1.2.4",
+    "starlette>=1.10.0",
+    "truststore>=0.10.5",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+hr-resume-hub = "hr_resume_hub.cli:main"
+hr-dashboard = "hr_resume_hub.dashboard.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hr_resume_hub"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+]
